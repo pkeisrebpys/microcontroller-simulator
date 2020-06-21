@@ -1,4 +1,12 @@
-all:main.exe
+all:main RL
 
-main.exe:src/main.cpp src/common.cpp src/Parameter.hpp src/UserProcess.cpp
+main:main.exe
+
+RL:RL.exe
+	
+main.exe:src/main.cpp src/UserProcess.cpp
 	g++ -o $@ $< -lm
+
+RL.exe:src/mainRL.cpp src/UserProcessRL.cpp
+	g++ -o $@ $< -lm
+
