@@ -50,12 +50,17 @@ static const int USER_IO_DO = 0x24;// unsigned short
 static const short AD_RANGE = 1024;
 
 static double TAU() {
-  return 0.7/CONTROL_CYCLE;
+  return 0.2/CONTROL_CYCLE;
+}
+static double CONNECT_RL() {
+  return 1.0/CONTROL_CYCLE/CONTROL_PER_PERIOD;
+}
+static double CONNECT_GAIN() {
+  return 20.0;
 }
 
 static double V_DC() {
   return 1.5;
 }
-
 
 #endif
