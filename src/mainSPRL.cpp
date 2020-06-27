@@ -12,19 +12,13 @@ class Circuit {
       mDI = in;
     }
     void init() {
-      mCycle = 0;
-      for (int i = 0; i < CONTROL_CYCLE; i++) {
-        for (int j = 0; j < LOG_SLOT_SIZE; j++) {
-          logdata[i][j] = 0;
-        }
-      }
-      mIntCount = 0;
+      mSrcCycle = 0;
       mVin = 0;
       mIout = 0;
       mDO = 0;
     }
     void run() {
-      mVin = sqrt(2.0)*sin(2.0*M_PI*(double)(mCycle+mIntCount*CONTROL_CYCLE)/(CONTROL_PER_PERIOD*CONTROL_CYCLE));
+      mVin = sqrt(2.0)*sin(2.0*M_PI*((double)mSrcCycle/(CONTROL_PER_PERIOD*CONTROL_CYCLE)));
       if (((mDO & (1<<0)) == 0) || (mPWM[0] == 0)) {
         mIout = 0;
       } else {
@@ -37,16 +31,9 @@ class Circuit {
           mDO = 0;
         }
       }
-      logdata[mCycle][0] = sensor(0);
-      logdata[mCycle][1] = sensor(1);
-      mCycle++;
-      if (mCycle >= CONTROL_CYCLE) {
-        mCycle = 0;
-        print();
-        mIntCount++;
-        if (mIntCount >= CONTROL_PER_PERIOD) {
-          mIntCount = 0;
-        }
+      mSrcCycle++;
+      if (mSrcCycle >= (CONTROL_PER_PERIOD*CONTROL_CYCLE)) {
+        mSrcCycle = 0;
       }
     }
     double sensor(int port) const {
@@ -62,21 +49,21 @@ class Circuit {
     unsigned short DO() const {
       return 0;
     }
+    double logger(int port) const {
+      switch(port) {
+        case 0:
+          return sensor(port);
+        case 1:
+          return sensor(port);
+        default:
+          return 0;
+      }
+    }
   private:
     int mPWM[USER_IO_PWM_SIZE];
     unsigned short mDI;
     unsigned short mDO;
-    int mCycle;
-    int mIntCount;
-    double logdata[CONTROL_CYCLE][LOG_SLOT_SIZE];
-    void print() const {
-      for (int i = 0; i < CONTROL_CYCLE; i++) {
-        for (int j = 0; j < LOG_SLOT_SIZE; j++) {
-          printf("%lf ", logdata[i][j]);
-        }
-        printf("\n");
-      }
-    }
+    int mSrcCycle;
     double mVin;
     double mIout;
 };

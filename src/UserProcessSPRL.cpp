@@ -6,7 +6,6 @@ namespace user {
   int cycle;
   short ref[CONTROL_PER_PERIOD];
   double lpf = 0;
-  double e_i = 0;
 
 }
 void UserProcess::init(char *IOmap) {
@@ -31,7 +30,6 @@ void UserProcess::run(char *IOmap) {
   if (user::cycle > 0) {
     user::lpf += (iin - user::lpf)/5.0;
     diff = (-(double)vin - user::lpf);
-    //user::e_i += 0.1 * diff;
   }
   double pwm = (CONTROL_CYCLE / V_DC()) * (2.0 / AD_RANGE) * ((double)vin + gain * 5.0 * (diff));
 

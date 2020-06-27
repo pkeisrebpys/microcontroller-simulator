@@ -20,6 +20,44 @@ class Timer {
     std::clock_t mStartTime;
     long mTotalTime;
 };
+class Logger {
+  public:
+    void init() {
+      mLogCycle = 0;
+      for (int i = 0; i < CONTROL_CYCLE; i++) {
+        for (int j = 0; j < LOG_SLOT_SIZE; j++) {
+          mLogData[i][j] = 0;
+        }
+      }
+    }
+    void run(const Circuit &circuit) {
+      for (int j = 0; j < LOG_SLOT_SIZE; j++) {
+        mLogData[mLogCycle][j] = circuit.logger(j);
+      }
+      mLogCycle++;
+      if (mLogCycle >= CONTROL_CYCLE) {
+        mLogCycle = 0;
+        for (int i = 0; i < CONTROL_CYCLE; i++) {
+          for (int j = 0; j < LOG_SLOT_SIZE; j++) {
+            printf("%lf ", mLogData[i][j]);
+          }
+          printf("\n");
+        }
+      }
+    }
+    void flush() {
+      for (int i = 0; i < mLogCycle; i++) {
+        for (int j = 0; j < LOG_SLOT_SIZE; j++) {
+          printf("%lf ", mLogData[i][j]);
+        }
+        printf("\n");
+      }
+      mLogCycle = 0;
+    }
+  private:
+    int mLogCycle;
+    double mLogData[CONTROL_CYCLE][LOG_SLOT_SIZE];
+};
 class Controller {
   public:
     void init() {
@@ -94,26 +132,27 @@ class Simulator {
   public:
     void run() {
       circuit.init();
+      logger.init();
       controller.init();
       for (int i = 0; i < SIMULATION_CYCLE; i++) {
         circuit.run();
+        logger.run(circuit);
         controller.run(circuit);
         for (int j = 0; j < USER_IO_PWM_SIZE; j++) {
           circuit.setPWM(j,controller.PWM(j));
         }
         circuit.setDI(controller.DO());
       }
-    }
-    void print() const {
+      logger.flush();
       controller.print();
     }
   private:
     Circuit circuit;
+    Logger logger;
     Controller controller;
 };
 int main(int argc, const char **argv) {
   Simulator sim;
   sim.run();
-  sim.print();
 }
 
